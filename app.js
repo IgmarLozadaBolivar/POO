@@ -1,3 +1,11 @@
+// Ventana emergente de Bienvenida
+Swal.fire({
+    title: '¡Bienvenido!',
+    text: 'Gracias por visitar nuestro sitio web!',
+    icon: 'info',
+    confirmButtonText: 'Aceptar'
+});
+
 class pregunta {
     constructor(texto, opcion, respuesta) {
         this.texto = texto;
@@ -87,7 +95,6 @@ const preguntas = [
         ["Abordar el comentario de manera respetuosa", "Ignorar el comentario y cambiar de tema rápidamente", "Reírte del comentario para evitar conflictos", "Retirarte de la situación sin decir nada"],
         "Abordar el comentario de manera respetuosa"
     ),
-    // Resto de preguntas...
 ];
 
 const quizInstance = new quiz(preguntas);
@@ -101,8 +108,8 @@ function desplegarPregunta() {
         .join("");
 
     document.getElementById("quiz-container").innerHTML = `
-      <div class="pregunta">${pregunta.texto}</div>
-      <ul class="opcion">${opciones}</ul>
+        <div class="pregunta">${pregunta.texto}</div>
+        <ul class="opcion">${opciones}</ul>
     `;
 }
 
@@ -130,7 +137,7 @@ document.getElementById("submit-button").addEventListener("click", () => {
             mensaje = `Puntaje: ${quizInstance.puntaje} de ${quizInstance.preguntas.length}<br><br><span class="animate__animated animate__bounceIn animate__slower animate__infinite">¡Felicitaciones!</span>`;
             startConfetti(5000);
         } else {
-            mensaje = `Puntaje: ${quizInstance.puntaje} de ${quizInstance.preguntas.length}<br><br>Debes mejorar tu escucha activa.`;
+            mensaje = `Puntaje: ${quizInstance.puntaje} de ${quizInstance.preguntas.length}<br><br>Debes mejorar tu escucha activa`;
         }
 
         Swal.fire({
@@ -138,12 +145,23 @@ document.getElementById("submit-button").addEventListener("click", () => {
             html: mensaje,
             icon: "info",
             confirmButtonText: "Repetir Quiz",
-            showCancelButton: false
+            showCancelButton: false,
+            onOpen: () => {
+                const confirmButton = Swal.getConfirmButton();
+                anime({
+                    targets: confirmButton,
+                    scale: [1, 1.1, 1],
+                    duration: 1000,
+                    loop: true,
+                    easing: "easeInOutQuad"
+                });
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 resetQuiz();
             }
         });
+
     } else {
         desplegarPregunta();
     }
@@ -152,8 +170,36 @@ document.getElementById("submit-button").addEventListener("click", () => {
 function resetQuiz() {
     quizInstance.puntaje = 0;
     quizInstance.preguntaActualIndex = 0;
-    desplegarPregunta();
+    const quizContainer = document.getElementById("quiz-container");
+    const confettiCanvas = document.getElementById("confetti-canvas");
+
+    anime({
+        targets: quizContainer,
+        opacity: 0,
+        duration: 500,
+        easing: "easeOutQuad",
+        complete: () => {
+            desplegarPregunta();
+
+            anime({
+                targets: quizContainer,
+                opacity: 1,
+                duration: 500,
+                easing: "easeInQuad"
+            });
+
+            confettiCanvas.innerHTML = "";
+        }
+    });
+    // Ventana emergente de Bienvenida
+    Swal.fire({
+        title: '¡Bienvenido otra vez!',
+        text: 'No has sido capaz de responder bien?',
+        icon: 'info',
+        confirmButtonText: 'Si'
+    });
 }
+
 
 function startConfetti(duration) {
     const confettiSettings = {
